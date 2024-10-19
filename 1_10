@@ -1,0 +1,118 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+
+char MyToupper(char c) {
+    if (c >= 'a' && c <= 'z') {
+        return c - 'a' + 'A';
+    }
+    return c;
+}
+
+// Функция для преобразования строки в число с заданным основанием
+long long conversion_to_number(char* str, int base) {
+    long long result = 0;
+    int len = strlen(str);
+    int sign = 1;
+
+    // Проверка на знак
+    if (str[0] == '-') {
+        sign = -1;
+        str++;
+        len--;
+    }
+
+    for (int i = 0; i < len; i++) {
+        char c = str[i];
+        int value;
+        if (c >= '0' && c <= '9') {
+            value = c - '0';
+        }
+        else {
+            value = MyToupper(c) - 'A' + 10;
+        }
+        result = result * base + value;
+    }
+
+    return result * sign;
+}
+
+// Функция для преобразования числа в строку с заданным основанием
+void convertFromBase10(long long num, int base, char* result) {
+    char digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    int index = 0;
+    int isNegative = 0;
+
+    if (num < 0) {
+        isNegative = 1;
+        num = -num;
+    }
+
+    do {
+        result[index++] = digits[num % base];
+        num /= base;
+    } while (num > 0);
+
+    if (isNegative) {
+        result[index++] = '-';
+    }
+
+    result[index] = '\0';
+
+    // Переворачиваем строку
+    for (int i = 0; i < index / 2; i++) {
+        char temp = result[i];
+        result[i] = result[index - i - 1];
+        result[index - i - 1] = temp;
+    }
+}
+
+int main() {
+    int base;
+    char input[100];
+    long long maxNumber = 0;
+    int firstNumber = 1;
+
+    printf("Введите основание системы счисления (2 - 36): ");
+    scanf_s("%d", &base);
+
+    if (base < 2 || base > 36) {
+        printf("Неверный ввод. Основание системы счисления должно быть от 2 до 36.\n");
+        return 1;
+    }
+
+    while (1) {
+        printf("Введите число в системе счисления с основанием %d (для остановки введите 'Stop'): ", base);
+        scanf("%s", input);
+
+        if (strcmp(input, "Stop") == 0) {
+            break;
+        }
+
+        long long number = conversion_to_number(input, base);
+
+        if (firstNumber || llabs(number) > llabs(maxNumber)) {
+            maxNumber = number;
+            firstNumber = 0;
+        }
+    }
+
+    if (firstNumber) {
+        printf("Необходимо ввести числа.\n");
+        return 0;
+    }
+
+    printf("Максимальное по модулю число: %lld\n", maxNumber);
+
+    int bases[] = {9, 18, 27, 36};
+    char result[100];
+
+    for (int i = 0; i < 4; i++) {
+        convertFromBase10(maxNumber, bases[i], result);
+        printf("Представление числа в системе счисления с основанием %d: %s\n", bases[i], result);
+    }
+
+    return 0;
+}
